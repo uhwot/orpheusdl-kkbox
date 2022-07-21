@@ -107,7 +107,7 @@ class ModuleInterface:
             '192k': 192,
             '320k': 320,
             'hifi': 1411,
-            'hires': 2117,
+            'hires': None,
         }[quality]
 
         return TrackInfo(
@@ -122,7 +122,7 @@ class ModuleInterface:
             explicit = bool(data['song_is_explicit']),
             artist_id = data['artist_more_url'].split('/')[-1] if not alb_info else alb_info['artist_more_url'].split('/')[-1],
             bit_depth = 16 if quality != 'hires' else 24,
-            sample_rate = 44.1,
+            sample_rate = 44.1 if quality != 'hires' else None,
             bitrate = bitrate,
             download_extra_kwargs = {'id': data['song_more_url'].split('/')[-1], 'quality': quality},
             cover_extra_kwargs = {'data': data},
