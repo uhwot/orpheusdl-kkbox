@@ -73,7 +73,7 @@ class KkboxAPI:
             'registration_id': '',
         })
 
-        if resp['status'] != -4:
+        if resp['status'] not in (3, -4):
             if resp['status'] == -1:
                 raise self.exception('Email not found')
             elif resp['status'] == -2:
