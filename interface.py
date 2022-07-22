@@ -88,10 +88,11 @@ class ModuleInterface:
         if 'featuredartists' in data['artist_role']:
             artists.extend(data['artist_role']['featuredartists'])
 
-        error = None
         if quality not in data['audio_quality']:
-            error = 'Track quality not available'
-        elif quality not in self.session.available_qualities:
+            quality = data['audio_quality'][-1]
+
+        error = None
+        if quality not in self.session.available_qualities:
             error = 'Quality not available by your subscription'
 
         codec = {
