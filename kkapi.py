@@ -7,7 +7,7 @@ from tqdm import tqdm
 from utils.utils import create_requests_session
 
 class KkboxAPI:
-    def __init__(self, exception, kc1_key, email, password):
+    def __init__(self, exception, kc1_key, email, password, kkid = None):
         self.exception = exception
         self.kc1_key = kc1_key.encode('ascii')
 
@@ -16,7 +16,7 @@ class KkboxAPI:
             'user-agent': 'okhttp/3.14.9'
         })
 
-        self.kkid = '%030X' % randrange(16**32)
+        self.kkid = kkid or '%030X' % randrange(16**32)
 
         self.hosts = {
             'ds': 'api-ds-http2.kkbox.com.tw',

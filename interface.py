@@ -10,6 +10,7 @@ module_information = ModuleInformation(
     module_supported_modes = ModuleModes.download | ModuleModes.lyrics | ModuleModes.covers,
     global_settings = {'kc1_key': ''},
     session_settings = {'email': '', 'password': ''},
+    session_storage_variables = ['kkid'],
     netlocation_constant = 'kkbox',
     url_decoding = ManualEnum.manual,
     login_behaviour = ManualEnum.manual,
@@ -27,7 +28,8 @@ class ModuleInterface:
         if self.default_cover.file_type is ImageFileTypeEnum.webp:
             self.default_cover.file_type = ImageFileTypeEnum.jpg
 
-        self.session = KkboxAPI(self.exception, settings['kc1_key'], settings['email'], settings['password'])
+        self.session = KkboxAPI(self.exception, settings['kc1_key'], settings['email'], settings['password'], self.tsc.read('kkid'))
+        self.tsc.set('kkid', self.session.kkid)
 
         self.quality_parse = {
             QualityEnum.MINIMUM: '128k',
