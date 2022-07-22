@@ -7,10 +7,10 @@ from .kkapi import KkboxAPI
 
 module_information = ModuleInformation(
     service_name = 'KKBOX',
-    module_supported_modes = ModuleModes.download | ModuleModes.lyrics | ModuleModes.covers,  
+    module_supported_modes = ModuleModes.download | ModuleModes.lyrics | ModuleModes.covers,
     global_settings = {'kc1_key': ''},
     session_settings = {'email': '', 'password': ''},
-    netlocation_constant = 'kkbox', 
+    netlocation_constant = 'kkbox',
     url_decoding = ManualEnum.manual,
     login_behaviour = ManualEnum.manual,
     test_url = 'https://play.kkbox.com/album/OspOC7CYqcVQY_uLAV'
@@ -325,5 +325,13 @@ class ModuleInterface:
             ) for i in results]
 
     def get_img_url(self, url_template, size, file_type: ImageFileTypeEnum):
+        url = url_template
         # not using .format() here because of possible data leak vulnerabilities
-        return url_template.replace('{width}', str(size)).replace('{height}', str(size)).replace('{format}', file_type.name)
+        if size > 2048:
+            url = url.replace('fit/{width}x{height}', 'original')
+            url = url.replace('cropresize/{width}x{height}', 'original')
+        else:
+            url = url.replace('{width}', str(size))
+            url = url.replace('{height}', str(size))
+        url = url.replace('{format}', file_type.name)
+        return url
