@@ -323,7 +323,7 @@ class ModuleInterface:
                 result_id = i['id'],
                 name = i['title'],
                 artists = [i['user']['name']],
-                additional = [i['content']]
+                additional = [i['content']] if i['content'] else None
             ) for i in results]
 
     def get_img_url(self, url_template, size, file_type: ImageFileTypeEnum):
