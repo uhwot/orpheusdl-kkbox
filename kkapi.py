@@ -78,6 +78,8 @@ class KkboxAPI:
                 raise self.exception('Email not found')
             elif resp['status'] == -2:
                 raise self.exception('Incorrect password')
+            elif resp['status'] == 1:
+                raise self.exception('Account expired')
             raise self.exception('Login failed')
         
         self.apply_session(resp)
