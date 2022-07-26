@@ -16,7 +16,7 @@ class KkboxAPI:
             'user-agent': 'okhttp/3.14.9'
         })
 
-        self.kkid = kkid or '%030X' % randrange(16**32)
+        self.kkid = kkid or '%032X' % randrange(16**32)
 
         self.params = {
             'enc': 'u',
