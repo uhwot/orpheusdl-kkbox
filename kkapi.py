@@ -18,12 +18,6 @@ class KkboxAPI:
 
         self.kkid = kkid or '%030X' % randrange(16**32)
 
-        self.hosts = {
-            'ds': 'api-ds-http2.kkbox.com.tw',
-            'login': 'api-login-http2.kkbox.com.tw',
-            'ticket': 'api-ticket.kkbox.com.tw',
-        }
-
         self.params = {
             'enc': 'u',
             'ver': '06090076',
@@ -48,11 +42,10 @@ class KkboxAPI:
         if host == 'ticket':
             payload = json.dumps(payload)
 
-        host = self.hosts[host]
         params.update(self.params)
         params.update({'timestamp': int(time())})
 
-        url = f'https://{host}/{path}'
+        url = f'https://api-{host}.kkbox.com.tw/{path}'
         if not payload:
             r = self.s.get(url, params=params)
         else:
