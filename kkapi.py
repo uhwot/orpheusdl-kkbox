@@ -172,7 +172,7 @@ class KkboxAPI:
             elif resp['status'] == 2:
                 # tbh i'm not sure if this is some rate-limiting thing
                 # or if it's a bug on their slow-as-hell servers
-                sleep(1)
+                sleep(0.5)
                 return self.get_ticket(song_id, play_mode)
             raise self.exception("Couldn't get track URLs")
 
