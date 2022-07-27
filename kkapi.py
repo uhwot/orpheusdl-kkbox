@@ -66,13 +66,15 @@ class KkboxAPI:
             'registration_id': '',
         })
 
-        if resp['status'] not in (3, -4):
+        if resp['status'] != 3:
             if resp['status'] == -1:
                 raise self.exception('Email not found')
             elif resp['status'] == -2:
                 raise self.exception('Incorrect password')
             elif resp['status'] == 1:
                 raise self.exception('Account expired')
+            elif resp['status'] == -4:
+                raise self.exception('IP address is in unsupported region, use a VPN')
             raise self.exception('Login failed')
         
         self.apply_session(resp)
