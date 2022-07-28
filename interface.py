@@ -67,7 +67,7 @@ class ModuleInterface:
             media_id = path_match.group(2)
         )
 
-    def get_track_info(self, track_id: str, quality_tier: QualityEnum, codec_options: CodecOptions, data={}, alb_info={}) -> TrackInfo:
+    def get_track_info(self, track_id: str, quality_tier: QualityEnum, codec_options: CodecOptions, data={}, alb_info={}, artist_dl=False) -> TrackInfo:
         quality = self.quality_parse[quality_tier]
         data = data.get(track_id)
         if not data:
@@ -86,7 +86,11 @@ class ModuleInterface:
         if 'featuredartist_list' in data['artist_role']:
             data['artist_role']['featuredartists'] = data['artist_role']['featuredartist_list']['featuredartist']
 
-        artists = data['artist_role']['mainartists']
+        # sometimes the artist name in the mainartists list is different from the actual one
+        # if an entire artist is being downloaded, the actual artist name gets used instead
+        # to make sure that orpheusdl doesn't skip tracks
+        # example: https://play.kkbox.com/artist/GtjT_E-Fw6HSCE7jgQ
+        artists = data['artist_role']['mainartists'] if not artist_dl else [alb_info['artist_name']]
         if 'featuredartists' in data['artist_role']:
             artists.extend(data['artist_role']['featuredartists'])
 
@@ -167,7 +171,7 @@ class ModuleInterface:
             temp_file_path = temp_path
         )
 
-    def get_album_info(self, album_id: str, raw_ids={}) -> Optional[AlbumInfo]:
+    def get_album_info(self, album_id: str, raw_ids={}, artist_dl=False) -> Optional[AlbumInfo]:
         raw_id = raw_ids.get(album_id)
         if not raw_id:
             raw_id = self.session.get_album(album_id)['album']['album_id']
@@ -196,7 +200,7 @@ class ModuleInterface:
             cover_type = self.default_cover.file_type,
             all_track_cover_jpg_url = self.get_img_url(info['album_photo_info']['url_template'], self.default_cover.resolution, ImageFileTypeEnum.jpg),
             description = info['album_descr'],
-            track_extra_kwargs = {'data': data_kwargs, 'alb_info': info}
+            track_extra_kwargs = {'data': data_kwargs, 'alb_info': info, 'artist_dl': artist_dl},
         )
 
     def get_playlist_info(self, playlist_id: str) -> PlaylistInfo:
@@ -244,7 +248,7 @@ class ModuleInterface:
         return ArtistInfo(
             name = profile['artist_name'],
             albums = album_id_list,
-            album_extra_kwargs = {'raw_ids': raw_ids},
+            album_extra_kwargs = {'raw_ids': raw_ids, 'artist_dl': True},
         )
 
     def get_track_cover(self, track_id: str, cover_options: CoverOptions, data=None) -> CoverInfo:
