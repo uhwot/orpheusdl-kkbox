@@ -59,28 +59,26 @@ class KkboxAPI:
         md5.update(password.encode('utf-8'))
         password = md5.hexdigest()
 
-        resp = self.api_call('login', 'login.php', payload={
+        resp = self.api_call('login-utapass', 'login.php', payload={
             'uid': email,
             'passwd': password,
             'kkid': self.kkid,
             'registration_id': '',
         })
 
-        if resp['status'] != 3:
+        if resp['status'] not in (3, -4):
             if resp['status'] == -1:
                 raise self.exception('Email not found')
             elif resp['status'] == -2:
                 raise self.exception('Incorrect password')
             elif resp['status'] == 1:
                 raise self.exception('Account expired')
-            elif resp['status'] == -4:
-                raise self.exception('IP address is in unsupported region, use a VPN')
             raise self.exception('Login failed')
         
         self.apply_session(resp)
 
     def renew_session(self):
-        resp = self.api_call('login', 'check.php')
+        resp = self.api_call('login-utapass', 'check.php')
         if resp['status'] != -4:
             raise self.exception('Session renewal failed')
         self.apply_session(resp)
