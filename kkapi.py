@@ -4,6 +4,7 @@ from random import randrange
 from Cryptodome.Cipher import ARC4
 from Cryptodome.Hash import MD5
 from tqdm import tqdm
+from requests import HTTPError
 from utils.utils import create_requests_session
 
 class KkboxAPI:
@@ -51,22 +52,27 @@ class KkboxAPI:
         else:
             r = self.s.post(url, params=params, data=payload)
 
-        resp = json.loads(self.kc1_decrypt(r.content))
+        resp = json.loads(self.kc1_decrypt(r.content)) if r.content else None
         return resp
 
-    def login(self, email, password):
+    def login(self, email, password, region_bypass=False):
         md5 = MD5.new()
         md5.update(password.encode('utf-8'))
-        password = md5.hexdigest()
+        pswd = md5.hexdigest()
 
-        resp = self.api_call('login-utapass', 'login.php', payload={
+        host = 'login' if not region_bypass else 'login-utapass'
+
+        resp = self.api_call(host, 'login.php', payload={
             'uid': email,
-            'passwd': password,
+            'passwd': pswd,
             'kkid': self.kkid,
             'registration_id': '',
         })
 
-        if resp['status'] not in (3, -4):
+        if not resp and region_bypass:
+            raise self.exception('Account expired')
+
+        if resp['status'] not in (2, 3, -4):
             if resp['status'] == -1:
                 raise self.exception('Email not found')
             elif resp['status'] == -2:
@@ -74,12 +80,19 @@ class KkboxAPI:
             elif resp['status'] == 1:
                 raise self.exception('Account expired')
             raise self.exception('Login failed')
-        
+
+        if resp['status'] == -4 and not region_bypass:
+            # region locked, need to call different login host
+            return self.login(email, password, region_bypass=True)
+
+        self.region_bypass = region_bypass
+
         self.apply_session(resp)
 
     def renew_session(self):
-        resp = self.api_call('login-utapass', 'check.php')
-        if resp['status'] not in (3, -4):
+        host = 'login' if not self.region_bypass else 'login-utapass'
+        resp = self.api_call(host, 'check.php')
+        if resp['status'] not in (2, 3, -4):
             raise self.exception('Session renewal failed')
         self.apply_session(resp)
 
