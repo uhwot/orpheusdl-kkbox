@@ -79,7 +79,7 @@ class KkboxAPI:
 
     def renew_session(self):
         resp = self.api_call('login-utapass', 'check.php')
-        if resp['status'] != -4:
+        if resp['status'] not in (3, -4):
             raise self.exception('Session renewal failed')
         self.apply_session(resp)
 
