@@ -13,7 +13,6 @@ module_information = ModuleInformation(
     session_storage_variables = ['kkid'],
     netlocation_constant = 'kkbox',
     url_decoding = ManualEnum.manual,
-    login_behaviour = ManualEnum.manual,
     test_url = 'https://play.kkbox.com/album/OspOC7CYqcVQY_uLAV'
 )
 
@@ -28,9 +27,6 @@ class ModuleInterface:
         if self.default_cover.file_type is ImageFileTypeEnum.webp:
             self.default_cover.file_type = ImageFileTypeEnum.jpg
 
-        self.session = KkboxAPI(self.exception, settings['kc1_key'], settings['email'], settings['password'], self.tsc.read('kkid'))
-        self.tsc.set('kkid', self.session.kkid)
-
         self.quality_parse = {
             QualityEnum.MINIMUM: '128k',
             QualityEnum.LOW: '128k',
@@ -40,9 +36,14 @@ class ModuleInterface:
             QualityEnum.HIFI: 'hires'
         }
 
-        curr_quality = self.quality_parse[module_controller.orpheus_options.quality_tier]
-        if self.check_sub and curr_quality not in self.session.available_qualities:
-            print('KKBOX: quality set in the settings is not accessible by the current subscription')
+        self.curr_quality = self.quality_parse[module_controller.orpheus_options.quality_tier]
+
+        kkid = self.tsc.read('kkid')
+        self.session = KkboxAPI(self.exception, settings['kc1_key'], kkid)
+        if kkid:
+            self.login(settings['email'], settings['password'])
+        else:
+            self.tsc.set('kkid', self.session.kkid)
 
     def custom_url_parse(self, link):
         url = urlparse(link)
@@ -66,6 +67,11 @@ class ModuleInterface:
             media_type = DownloadTypeEnum[type],
             media_id = path_match.group(2)
         )
+
+    def login(self, email: str, password: str):
+        self.session.login(email, password)
+        if self.check_sub and self.curr_quality not in self.session.available_qualities:
+            print('KKBOX: quality set in the settings is not accessible by the current subscription')
 
     def get_track_info(self, track_id: str, quality_tier: QualityEnum, codec_options: CodecOptions, data={}, alb_info={}, artist_dl=False) -> TrackInfo:
         quality = self.quality_parse[quality_tier]

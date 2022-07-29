@@ -4,11 +4,10 @@ from random import randrange
 from Cryptodome.Cipher import ARC4
 from Cryptodome.Hash import MD5
 from tqdm import tqdm
-from requests import HTTPError
 from utils.utils import create_requests_session
 
 class KkboxAPI:
-    def __init__(self, exception, kc1_key, email, password, kkid = None):
+    def __init__(self, exception, kc1_key, kkid = None):
         self.exception = exception
         self.kc1_key = kc1_key.encode('ascii')
 
@@ -32,8 +31,6 @@ class KkboxAPI:
             'of': 'j',
             'oenc': 'kc1',
         }
-
-        self.login(email, password)
 
     def kc1_decrypt(self, data):
         cipher = ARC4.new(self.kc1_key)
