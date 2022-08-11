@@ -147,7 +147,7 @@ class ModuleInterface:
         format = {
             '128k': 'mp3_128k_chromecast',
             '192k': 'mp3_192k_kkdrm1',
-            '320k': 'aac_320_download_kkdrm',
+            '320k': 'aac_320k_m4a_kkdrm1',
             'hifi': 'flac_16_download_kkdrm',
             'hires': 'flac_24_download_kkdrm',
         }[quality]
