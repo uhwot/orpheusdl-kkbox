@@ -76,7 +76,7 @@ class KkboxAPI:
                 raise self.exception('Incorrect password')
             elif resp['status'] == 1:
                 raise self.exception('Account expired')
-            raise self.exception('Login failed')
+            raise self.exception(f'Login failed, status code {resp["status"]}')
 
         if resp['status'] == -4 and not region_bypass:
             # region locked, need to call different login host
