@@ -52,44 +52,34 @@ class KkboxAPI:
         resp = json.loads(self.kc1_decrypt(r.content)) if r.content else None
         return resp
 
-    def login(self, email, password, region_bypass=False):
+    def login(self, email, password):
         md5 = MD5.new()
         md5.update(password.encode('utf-8'))
         pswd = md5.hexdigest()
 
-        host = 'login' if not region_bypass else 'login-utapass'
-
-        resp = self.api_call(host, 'login.php', payload={
+        resp = self.api_call('login', 'login.php', payload={
             'uid': email,
             'passwd': pswd,
             'kkid': self.kkid,
             'registration_id': '',
         })
 
-        if not resp and region_bypass:
-            raise self.exception('Account expired')
-
-        if resp['status'] not in (2, 3, -4):
+        if resp['status'] not in (2, 3):
             if resp['status'] == -1:
                 raise self.exception('Email not found')
             elif resp['status'] == -2:
                 raise self.exception('Incorrect password')
+            elif resp['status'] == -4:
+                raise self.exception('IP address is in unsupported region, use a VPN')
             elif resp['status'] == 1:
                 raise self.exception('Account expired')
             raise self.exception(f'Login failed, status code {resp["status"]}')
 
-        if resp['status'] == -4 and not region_bypass:
-            # region locked, need to call different login host
-            return self.login(email, password, region_bypass=True)
-
-        self.region_bypass = region_bypass
-
         self.apply_session(resp)
 
     def renew_session(self):
-        host = 'login' if not self.region_bypass else 'login-utapass'
-        resp = self.api_call(host, 'check.php')
-        if resp['status'] not in (2, 3, -4):
+        resp = self.api_call('login', 'check.php')
+        if resp['status'] not in (2, 3):
             raise self.exception('Session renewal failed')
         self.apply_session(resp)
 
