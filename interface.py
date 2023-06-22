@@ -58,7 +58,7 @@ class ModuleInterface:
 
         if not path_match:
             raise self.exception(f'Invalid URL: {link}')
-        
+
         type = path_match.group(1)
         if type == 'song':
             type = 'track'
@@ -79,12 +79,18 @@ class ModuleInterface:
         if not data:
             data = self.session.get_songs([track_id])[0]
 
+        if not alb_info:
+            album_id = data.get('raw_album_id') or int(data['album_id'])
+            alb_data = self.session.get_album_more(album_id)
+            alb_info = alb_data['info']
+            alb_info['num_tracks'] = len(alb_data['song_list']['song'])
+
         tags = Tags(
-            album_artist = alb_info.get('artist_name') or data['artist_name'],
+            album_artist = alb_info['artist_name'],
             track_number = int(data['song_idx']),
-            total_tracks = alb_info.get('num_tracks'),
+            total_tracks = alb_info['num_tracks'],
             genres = [data['genre_name']],
-            release_date = alb_info.get('album_date')
+            release_date = alb_info['album_date'],
         )
 
         if 'mainartist_list' in data['artist_role']:
@@ -125,15 +131,15 @@ class ModuleInterface:
 
         return TrackInfo(
             name = data.get('song_name') or data['text'],
-            album_id = data['album_more_url'].split('/')[-1] if not alb_info else alb_info['album_more_url'].split('/')[-1],
-            album = data['album_name'] if not alb_info else alb_info['album_name'],
+            album_id = alb_info['album_more_url'].split('/')[-1],
+            album = alb_info['album_name'],
             artists = artists,
             tags = tags,
             codec = codec,
             cover_url = self.get_img_url(data['album_photo_info']['url_template'], self.default_cover.resolution, self.default_cover.file_type),
-            release_year = int(alb_info['album_date'].split('-')[0]) if alb_info else None,
+            release_year = int(alb_info['album_date'].split('-')[0]),
             explicit = bool(data['song_is_explicit']),
-            artist_id = data['artist_more_url'].split('/')[-1] if not alb_info else alb_info['artist_more_url'].split('/')[-1],
+            artist_id = alb_info['artist_more_url'].split('/')[-1],
             bit_depth = 16 if quality != 'hires' else 24,
             sample_rate = 44.1 if quality != 'hires' else None,
             bitrate = bitrate,
