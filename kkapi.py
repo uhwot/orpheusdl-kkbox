@@ -7,9 +7,10 @@ from tqdm import tqdm
 from utils.utils import create_requests_session
 
 class KkboxAPI:
-    def __init__(self, exception, kc1_key, kkid = None):
+    def __init__(self, exception, kc1_key, secret_key, kkid = None):
         self.exception = exception
         self.kc1_key = kc1_key.encode('ascii')
+        self.secret_key = secret_key.encode('ascii')
 
         self.s = create_requests_session()
         self.s.headers.update({
@@ -20,14 +21,14 @@ class KkboxAPI:
 
         self.params = {
             'enc': 'u',
-            'ver': '06090076',
+            'ver': '06120082',
             'os': 'android',
-            'osver': '11',
+            'osver': '13',
             'lang': 'en',
             'ui_lang': 'en',
             'dist': '0021',
             'dist2': '0021',
-            'resolution': '411x683',
+            'resolution': '411x841',
             'of': 'j',
             'oenc': 'kc1',
         }
@@ -40,8 +41,16 @@ class KkboxAPI:
         if host == 'ticket':
             payload = json.dumps(payload)
 
+        timestamp = int(time())
+
+        md5 = MD5.new()
+        md5.update(self.params['ver'].encode('ascii'))
+        md5.update(str(timestamp).encode('ascii'))
+        md5.update(self.secret_key)
+
         params.update(self.params)
-        params.update({'timestamp': int(time())})
+        params.update({'secret': md5.hexdigest()})
+        params.update({'timestamp': timestamp})
 
         url = f'https://api-{host}.kkbox.com.tw/{path}'
         if not payload:
@@ -152,9 +161,9 @@ class KkboxAPI:
         resp = self.api_call('ticket', 'v1/ticket', payload={
             'sid': self.sid,
             'song_id': song_id,
-            'ver': '06090076',
+            'ver': '06120082',
             'os': 'android',
-            'osver': '11',
+            'osver': '13',
             'kkid': self.kkid,
             'dist': '0021',
             'dist2': '0021',
@@ -185,11 +194,11 @@ class KkboxAPI:
             'os': 'android',
             'enc': 'u',
             'sid': self.sid,
-            'ver': '06090076',
+            'ver': '06120082',
             'kkid': self.kkid,
             'lang': 'en',
             'oenc': 'kc1',
-            'osver': '11',
+            'osver': '13',
         })
         if resp['status'] != 1:
             raise self.exception("Couldn't auth device")

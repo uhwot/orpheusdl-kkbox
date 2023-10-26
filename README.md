@@ -27,8 +27,9 @@
 Supports any resolution within 2048px, after which it downloads the original cover size
 
 ## KKBOX
-| Setting    | Description                 |
-| ---------- | --------------------------- |
-| `kc1_key`  | Key used for API decryption |
-| `email`    | Account email               |
-| `password` | Account password            |
+| Setting     | Description                    |
+| ----------- | ------------------------------ |
+| `kc1_key`   | Key used for API decryption    |
+| `secret_key`| Constant used for "secret" MD5 |
+| `email`     | Account email                  |
+| `password`  | Account password               |

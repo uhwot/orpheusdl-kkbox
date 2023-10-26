@@ -8,7 +8,7 @@ from .kkapi import KkboxAPI
 module_information = ModuleInformation(
     service_name = 'KKBOX',
     module_supported_modes = ModuleModes.download | ModuleModes.lyrics | ModuleModes.covers,
-    global_settings = {'kc1_key': ''},
+    global_settings = {'kc1_key': '', 'secret_key': ''},
     session_settings = {'email': '', 'password': ''},
     session_storage_variables = ['kkid'],
     netlocation_constant = 'kkbox',
@@ -39,7 +39,7 @@ class ModuleInterface:
         self.curr_quality = self.quality_parse[module_controller.orpheus_options.quality_tier]
 
         kkid = self.tsc.read('kkid')
-        self.session = KkboxAPI(self.exception, settings['kc1_key'], kkid)
+        self.session = KkboxAPI(self.exception, settings['kc1_key'], settings['secret_key'], kkid)
         if kkid:
             self.login(settings['email'], settings['password'])
         else:
