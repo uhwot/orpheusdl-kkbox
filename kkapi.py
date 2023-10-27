@@ -1,4 +1,5 @@
 import json
+import re
 from time import time, sleep
 from random import randrange
 from Cryptodome.Cipher import ARC4
@@ -9,6 +10,13 @@ from utils.utils import create_requests_session
 class KkboxAPI:
     def __init__(self, exception, kc1_key, secret_key, kkid = None):
         self.exception = exception
+
+        key_pattern = re.compile("[0-9a-f]{32}")
+        if not key_pattern.fullmatch(kc1_key):
+            raise self.exception("kc1_key is invalid, change it in settings")
+        if not key_pattern.fullmatch(secret_key):
+            raise self.exception("secret_key is invalid, change it in settings")
+
         self.kc1_key = kc1_key.encode('ascii')
         self.secret_key = secret_key.encode('ascii')
 
