@@ -41,9 +41,7 @@ class ModuleInterface:
         kkid = self.tsc.read('kkid')
         self.session = KkboxAPI(self.exception, settings['kc1_key'], settings['secret_key'], kkid)
         if kkid:
-            self.login(settings['email'], settings['password'])
-        else:
-            self.tsc.set('kkid', self.session.kkid)
+            self.login(settings['email'], settings['password'], new_login=False)
 
     def custom_url_parse(self, link):
         url = urlparse(link)
@@ -68,8 +66,10 @@ class ModuleInterface:
             media_id = path_match.group(2)
         )
 
-    def login(self, email: str, password: str):
+    def login(self, email: str, password: str, new_login=True):
         self.session.login(email, password)
+        if new_login:
+            self.tsc.set('kkid', self.session.kkid)
         if self.check_sub and self.curr_quality not in self.session.available_qualities:
             print('KKBOX: quality set in the settings is not accessible by the current subscription')
 
